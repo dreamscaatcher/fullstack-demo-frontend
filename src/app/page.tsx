@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
+const API_URL = 'https://fullstack-demo-backend-production.up.railway.app';
+
 export default function Home() {
   const [backendMessage, setBackendMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
@@ -9,7 +11,7 @@ export default function Home() {
   useEffect(() => {
     const fetchMessage = async () => {
       try {
-        const response = await fetch('http://localhost:8000/');
+        const response = await fetch(`${API_URL}/`);
         const data = await response.json();
         setBackendMessage(data.message);
       } catch (error) {

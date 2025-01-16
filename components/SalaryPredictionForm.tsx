@@ -15,6 +15,7 @@ import {
 export default function SalaryPredictionForm() {
   const [prediction, setPrediction] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     experience_level: 'EN',
     company_size: 'S',
@@ -25,6 +26,8 @@ export default function SalaryPredictionForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
+    setError(null)
+    setPrediction(null)
     
     try {
       const response = await fetch('https://fullstack-demo-backend-production.up.railway.app/predict', {
@@ -35,10 +38,19 @@ export default function SalaryPredictionForm() {
         body: JSON.stringify(formData),
       })
       
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
       const data = await response.json()
-      setPrediction(data.salary_prediction_usd)
+      if (data.salary_prediction_usd) {
+        setPrediction(data.salary_prediction_usd)
+      } else {
+        throw new Error('Invalid response format')
+      }
     } catch (error) {
       console.error('Error:', error)
+      setError('Failed to get prediction. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -52,10 +64,10 @@ export default function SalaryPredictionForm() {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="experience">Experience Level</Label>
+            <Label>Experience Level</Label>
             <Select 
-              value={formData.experience_level}
-              onValueChange={(value) => setFormData({...formData, experience_level: value})}
+              defaultValue={formData.experience_level}
+              onValueChange={(value) => setFormData(prev => ({...prev, experience_level: value}))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select experience level" />
@@ -70,10 +82,10 @@ export default function SalaryPredictionForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="company_size">Company Size</Label>
+            <Label>Company Size</Label>
             <Select
-              value={formData.company_size}
-              onValueChange={(value) => setFormData({...formData, company_size: value})}
+              defaultValue={formData.company_size}
+              onValueChange={(value) => setFormData(prev => ({...prev, company_size: value}))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select company size" />
@@ -87,10 +99,10 @@ export default function SalaryPredictionForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="employment_type">Employment Type</Label>
+            <Label>Employment Type</Label>
             <Select
-              value={formData.employment_type}
-              onValueChange={(value) => setFormData({...formData, employment_type: value})}
+              defaultValue={formData.employment_type}
+              onValueChange={(value) => setFormData(prev => ({...prev, employment_type: value}))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select employment type" />
@@ -103,10 +115,10 @@ export default function SalaryPredictionForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="job_title">Job Title</Label>
+            <Label>Job Title</Label>
             <Select
-              value={formData.job_title}
-              onValueChange={(value) => setFormData({...formData, job_title: value})}
+              defaultValue={formData.job_title}
+              onValueChange={(value) => setFormData(prev => ({...prev, job_title: value}))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select job title" />
@@ -123,14 +135,20 @@ export default function SalaryPredictionForm() {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Predicting...' : 'Predict Salary'}
           </Button>
-        </form>
 
-        {prediction !== null && (
-          <div className="mt-8 p-4 bg-slate-100 rounded-lg">
-            <h2 className="text-xl font-bold mb-2">Predicted Salary:</h2>
-            <p className="text-3xl text-blue-600">${prediction.toLocaleString()}</p>
-          </div>
-        )}
+          {error && (
+            <div className="mt-4 p-4 bg-red-50 text-red-600 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          {prediction !== null && (
+            <div className="mt-4 p-4 bg-slate-100 rounded-lg">
+              <h2 className="text-xl font-bold mb-2">Predicted Salary:</h2>
+              <p className="text-3xl text-blue-600">${prediction.toLocaleString()}</p>
+            </div>
+          )}
+        </form>
       </CardContent>
     </Card>
   )

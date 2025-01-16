@@ -27,7 +27,8 @@ export default function SalaryPredictionForm() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    setPrediction(null)
+    
+    console.log('Sending data:', formData) // Debug log
     
     try {
       const response = await fetch('https://fullstack-demo-backend-production.up.railway.app/predict', {
@@ -38,19 +39,17 @@ export default function SalaryPredictionForm() {
         body: JSON.stringify(formData),
       })
       
+      const data = await response.json()
+      console.log('Response:', data) // Debug log
+      
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        throw new Error(data.detail || 'Prediction failed')
       }
       
-      const data = await response.json()
-      if (data.salary_prediction_usd) {
-        setPrediction(data.salary_prediction_usd)
-      } else {
-        throw new Error('Invalid response format')
-      }
+      setPrediction(data.salary_prediction_usd)
     } catch (error) {
       console.error('Error:', error)
-      setError('Failed to get prediction. Please try again.')
+      setError(error instanceof Error ? error.message : 'Failed to get prediction')
     } finally {
       setLoading(false)
     }

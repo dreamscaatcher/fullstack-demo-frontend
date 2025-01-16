@@ -124,7 +124,6 @@ export default function SalaryPredictionForm() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Data Engineer">Data Engineer</SelectItem>
-                <SelectItem value="Data Manager">Data Manager</SelectItem>
                 <SelectItem value="Data Scientist">Data Scientist</SelectItem>
                 <SelectItem value="Machine Learning Engineer">Machine Learning Engineer</SelectItem>
               </SelectContent>
